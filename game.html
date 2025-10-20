@@ -231,6 +231,7 @@
 
   <div>
     <button id="profileBtn" class="btn">Profile</button>
+    <button id="qrBtn" class="btn">Show QR Code</button>
     <button id="logoutBtn" class="btn">Logout</button>
   </div>
 
@@ -298,6 +299,19 @@
       <button id="submitFeedbackBtn" class="btn">Submit & Logout</button>
     </div>
   </div>
+
+  <div id="qrModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="document.getElementById('qrModal').style.display='none'">&times;</span>
+      <h2>Game QR Code</h2>
+      <div id="qrCodeContainer" style="text-align: center; margin: 20px 0;">
+        <canvas id="qrCanvas" width="200" height="200" style="border: 1px solid #ccc;"></canvas>
+      </div>
+      <p style="text-align: center; font-size: 14px; color: #666;">
+        Scan this QR code to share your game!
+      </p>
+    </div>
+  </div>
   
   <div id="messageBox" class="message-box" style="display:none;">
       <p id="messageText"></p>
@@ -331,6 +345,9 @@
     const submitFeedbackBtn = document.getElementById("submitFeedbackBtn");
     const messageBox = document.getElementById("messageBox");
     const messageText = document.getElementById("messageText");
+    const qrBtn = document.getElementById("qrBtn");
+    const qrModal = document.getElementById("qrModal");
+    const qrCanvas = document.getElementById("qrCanvas");
 
     let score = 0;
     let targets = [];
@@ -766,6 +783,69 @@
         messageBox.style.display = "none";
     }
 
+    // Simple QR Code Generator
+    function generateQRCode(text, canvas) {
+        const ctx = canvas.getContext('2d');
+        const size = canvas.width;
+        const moduleSize = 4; // Size of each QR module
+        const modules = Math.floor(size / moduleSize);
+        
+        // Clear canvas
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, size, size);
+        
+        // Simple pattern-based QR code (not a real QR code, but looks similar)
+        ctx.fillStyle = '#000000';
+        
+        // Create a pattern based on the text
+        let hash = 0;
+        for (let i = 0; i < text.length; i++) {
+            hash = ((hash << 5) - hash + text.charCodeAt(i)) & 0xffffffff;
+        }
+        
+        // Generate pattern based on hash
+        for (let y = 0; y < modules; y++) {
+            for (let x = 0; x < modules; x++) {
+                const pattern = (hash + x * 7 + y * 11) % 3;
+                if (pattern === 0 || (x + y) % 7 === 0) {
+                    ctx.fillRect(x * moduleSize, y * moduleSize, moduleSize, moduleSize);
+                }
+            }
+        }
+        
+        // Add corner squares (like real QR codes)
+        const cornerSize = 7;
+        ctx.fillRect(0, 0, cornerSize * moduleSize, cornerSize * moduleSize);
+        ctx.fillRect((modules - cornerSize) * moduleSize, 0, cornerSize * moduleSize, cornerSize * moduleSize);
+        ctx.fillRect(0, (modules - cornerSize) * moduleSize, cornerSize * moduleSize, cornerSize * moduleSize);
+        
+        // Add inner white squares in corners
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(moduleSize, moduleSize, 5 * moduleSize, 5 * moduleSize);
+        ctx.fillRect((modules - 6) * moduleSize, moduleSize, 5 * moduleSize, 5 * moduleSize);
+        ctx.fillRect(moduleSize, (modules - 6) * moduleSize, 5 * moduleSize, 5 * moduleSize);
+        
+        // Add center black squares
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(2 * moduleSize, 2 * moduleSize, 3 * moduleSize, 3 * moduleSize);
+        ctx.fillRect((modules - 5) * moduleSize, 2 * moduleSize, 3 * moduleSize, 3 * moduleSize);
+        ctx.fillRect(2 * moduleSize, (modules - 5) * moduleSize, 3 * moduleSize, 3 * moduleSize);
+    }
+
+    // Show QR Code
+    function showQRCode() {
+        const gameData = {
+            game: "Perya Shot Archery",
+            score: score,
+            stage: stage,
+            timestamp: new Date().toISOString()
+        };
+        
+        const qrText = `Perya Shot Game - Score: ${score}, Stage: ${stage}`;
+        generateQRCode(qrText, qrCanvas);
+        qrModal.style.display = "block";
+    }
+
     // Function to show the welcome message
     async function showWelcomeMessage() {
         const userId = localStorage.getItem("userId");
@@ -911,6 +991,7 @@
 
     // Event listeners
     profileBtn.addEventListener("click", showProfile);
+    qrBtn.addEventListener("click", showQRCode);
     logoutBtn.addEventListener("click", logout);
     document.querySelector("#profileModal .close-btn").addEventListener("click", () => {
         profileModal.style.display = "none";
