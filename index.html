@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perya Shot - Login</title>
+  <style>
+    body {
+  font-family: 'Segoe UI', sans-serif;
+  background: url('img/index.jpg') no-repeat center center fixed;
+  background-size: cover;
+  margin: 0;
+  height: 100vh;               /* full viewport height */
+  display: flex;               /* flexbox */
+  justify-content: center;     /* center horizontally */
+  align-items: center;         /* center vertically */
+}
+
+    .container {
+      background: #f7f5f55d;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.25);
+      width: 380px;
+      text-align: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .container h1 {
+      margin: 0;
+      font-size: 28px;
+      color: #d32f2f;
+      font-weight: bold;
+      text-shadow: 2px 2px #ffcc00; /* gold carnival outline */
+    }
+
+    .container h2 {
+      color: #7f0000;
+      font-size: 22px;
+      margin-top: 20px;
+      margin-bottom: 25px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #7f0000;
+      font-weight: 600;
+    }
+
+    .form-group input {
+      width: 95%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #ff4e50;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #d32f2f;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #b71c1c;
+    }
+
+    .switch-link {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #7f0000;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .switch-link:hover {
+      color: #ff4e50;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Perya Shot</h1>
+    <div id="forms-container">
+      
+      <!-- Login Form -->
+      <form id="loginForm">
+        <h2>Login</h2>
+        <div class="form-group">
+          <input type="text" id="username" placeholder="Username" required>
+        </div>
+        <div class="form-group">
+          <input type="password" id="password" placeholder="Password" required>
+        </div>
+        <button type="submit" class="btn">Login</button>
+      </form>
+
+      <!-- Registration Form (hidden by default) -->
+      <form id="registerForm" style="display: none;">
+        <h2>Register</h2>
+        <div class="form-group">
+          <input type="text" id="regUsername" placeholder="Choose Username" required>
+        </div>
+        <div class="form-group">
+          <input type="email" id="regEmail" placeholder="Enter Email" required>
+        </div>
+        <div class="form-group">
+          <input type="password" id="regPassword" placeholder="Choose Password" required>
+        </div>
+        <button type="submit" class="btn">Register</button>
+      </form>
+    </div>
+
+    <div class="switch-link" onclick="toggleForms()">Don’t have an account? Register here</div>
+  </div>
+
+  <script>
+    // Function to show/hide the forms
+    function toggleForms() {
+      const loginForm = document.getElementById("loginForm");
+      const registerForm = document.getElementById("registerForm");
+      const switchLink = document.querySelector(".switch-link");
+      const heading = document.querySelector("h2");
+      
+      if (loginForm.style.display !== "none") {
+        loginForm.style.display = "none";
+        registerForm.style.display = "block";
+        switchLink.innerHTML = 'Already have an account? Login here';
+        heading.innerText = 'Register';
+      } else {
+        loginForm.style.display = "block";
+        registerForm.style.display = "none";
+        switchLink.innerHTML = 'Don’t have an account? Register here';
+        heading.innerText = 'Login';
+      }
+    }
+
+    // Handle Login
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const res = await fetch("http://localhost:3000/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const data = await res.json();
+        alert(data.message);
+
+        if (res.ok) {
+          // Store the user ID in local storage for the game page
+          localStorage.setItem('userId', data.userId);
+          window.location.href = "game.html"; // redirect to your game page
+        }
+      } catch (err) {
+        alert("Login failed! Please try again.");
+      }
+    });
+
+    // Handle Register
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("regUsername").value;
+      const email = document.getElementById("regEmail").value;
+      const password = document.getElementById("regPassword").value;
+
+      try {
+        const res = await fetch("http://localhost:3000/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, email, password }),
+        });
+
+        const data = await res.json();
+        alert(data.message);
+
+        if (res.ok) {
+          toggleForms(); // switch back to login after success
+        }
+      } catch (err) {
+        alert("Registration failed! Please try again.");
+      }
+    });
+  </script>
+
+</body>
+</html>

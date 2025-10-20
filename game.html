@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perya Shot - Game</title>
+  <style>
+   body {
+    font-family: 'Segoe UI', sans-serif;
+    background: url('img/123123.jpg') no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    overflow: hidden;
+    text-align: center;
+}
+
+    h1 {
+      color: #fff;
+      text-shadow: 2px 2px #000;
+      margin: 10px 0;
+    }
+
+    #scoreboard, #ammoCount {
+      margin: 15px 0;
+      font-size: 20px;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    #gameCanvas {
+      background: #fefbd8;
+      border: 4px solid #b71c1c;
+      border-radius: 12px;
+      display: block;
+      margin: auto;
+      margin-top: 10px;
+      box-shadow: 0px 8px 16px rgba(0,0,0,0.3);
+    }
+
+    .btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      transition: transform 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Styles for the Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 10;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+      animation: fadeIn 0.3s forwards;
+    }
+    
+    .modal-content {
+      background: linear-gradient(145deg, #ffcc80, #ffab91);
+      margin: 5% auto;
+      padding: 30px;
+      border: none;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      text-align: left;
+      color: #4b0d0b;
+      position: relative;
+    }
+
+    .close-btn {
+      color: #888;
+      font-size: 32px;
+      font-weight: bold;
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+      color: #b71c1c;
+      text-decoration: none;
+    }
+    
+    .profile-header {
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    #profileImage {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 5px solid #b71c1c;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .profile-info {
+      text-align: center;
+      margin: 15px 0;
+    }
+
+    .score-container {
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .score-box {
+      background-color: rgba(255, 255, 255, 0.7);
+      padding: 10px;
+      border-radius: 10px;
+      width: 45%;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    #scoreList {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 15px;
+      background-color: #fefbd8;
+    }
+
+    #scoreList li {
+      list-style-type: none;
+      padding: 8px 0;
+      border-bottom: 1px dashed #e0e0e0;
+    }
+    #scoreList li:last-child {
+      border-bottom: none;
+    }
+
+    .form-section {
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 2px solid #b71c1c;
+    }
+    
+    #profileForm input {
+      width: 95%;
+      padding: 12px;
+      margin: 8px 0 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+    }
+
+    .update-btn {
+      width: 100%;
+      background-color: #b71c1c;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background-color 0.2s ease;
+    }
+    
+    .update-btn:hover {
+      background-color: #880e4f;
+    }
+
+    #welcomeModal .modal-content, #logoutModal .modal-content {
+      text-align: center;
+    }
+    
+    #welcomeModal h2 {
+      margin-top: 0;
+    }
+    
+    #logoutModal .rating {
+      font-size: 36px;
+      color: #ffc107;
+      cursor: pointer;
+    }
+
+    #logoutModal .rating .star {
+      transition: transform 0.2s ease, text-shadow 0.2s ease;
+    }
+
+    #logoutModal .rating .star:hover {
+      transform: scale(1.2);
+    }
+
+    .message-box {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        z-index: 100;
+        text-align: center;
+        width: 80%;
+        max-width: 300px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Perya Shot - Archery Mode</h1>
+  <div id="scoreboard">Score: 0</div>
+  <div id="ammoCount">Arrows: 15</div>
+  <canvas id="gameCanvas"></canvas>
+
+  <div>
+    <button id="profileBtn" class="btn">Profile</button>
+    <button id="logoutBtn" class="btn">Logout</button>
+  </div>
+
+  <div id="welcomeModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="document.getElementById('welcomeModal').style.display='none'">&times;</span>
+      <h2>Welcome back, <span id="welcomeUsername">Player</span>!</h2>
+      <p>Have a great time playing the Perya Shot game. Hit all the archery targets to score points!</p>
+      <button class="btn" onclick="document.getElementById('welcomeModal').style.display='none'">Start Playing</button>
+    </div>
+  </div>
+
+  <div id="profileModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <div class="profile-header">
+        <img id="profileImage" src="https://placehold.co/120x120/A0A0A0/ffffff?text=Perya" alt="Profile Picture">
+        <h2 id="profileUsername"></h2>
+      </div>
+      <div class="profile-info">
+        <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+      </div>
+
+      <div class="score-container">
+        <div class="score-box">
+          <h3>Current Score</h3>
+          <p id="currentScore">0</p>
+        </div>
+        <div class="score-box">
+          <h3>Highest Score</h3>
+          <p id="highestScore">0</p>
+        </div>
+      </div>
+
+      <h3>Your Recent Scores</h3>
+      <ul id="scoreList"></ul>
+
+      <div class="form-section">
+        <h3>Update Profile</h3>
+        <form id="profileForm">
+          <label for="newUsername">New Username:</label>
+          <input type="text" id="newUsername" required>
+          <label for="newEmail">New Email:</label>
+          <input type="email" id="newEmail" required>
+          <label for="profilePicUrl">Profile Picture URL:</label>
+          <input type="text" id="profilePicUrl" placeholder="Paste image URL here">
+          <button type="submit" class="update-btn">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="logoutModal" class="modal">
+    <div class="modal-content">
+      <h2>Thank you for playing!</h2>
+      <p>Please rate your experience:</p>
+      <div class="rating" id="ratingStars">
+        <span class="star" data-value="1">&#9733;</span>
+        <span class="star" data-value="2">&#9733;</span>
+        <span class="star" data-value="3">&#9733;</span>
+        <span class="star" data-value="4">&#9733;</span>
+        <span class="star" data-value="5">&#9733;</span>
+      </div>
+      <p id="ratingMessage" style="font-size: 14px; margin-top: 10px;"></p>
+      <button id="submitFeedbackBtn" class="btn">Submit & Logout</button>
+    </div>
+  </div>
+  
+  <div id="messageBox" class="message-box" style="display:none;">
+      <p id="messageText"></p>
+      <button onclick="hideMessage()">OK</button>
+  </div>
+
+
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreboard = document.getElementById("scoreboard");
+    const ammoCountElement = document.getElementById("ammoCount");
+    const profileBtn = document.getElementById("profileBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const welcomeModal = document.getElementById("welcomeModal");
+    const profileModal = document.getElementById("profileModal");
+    const logoutModal = document.getElementById("logoutModal");
+    const welcomeUsername = document.getElementById("welcomeUsername");
+    const profileUsername = document.getElementById("profileUsername");
+    const profileEmail = document.getElementById("profileEmail");
+    const highestScore = document.getElementById("highestScore");
+    const currentScore = document.getElementById("currentScore");
+    const profileImage = document.getElementById("profileImage");
+    const scoreList = document.getElementById("scoreList");
+    const profileForm = document.getElementById("profileForm");
+    const newUsername = document.getElementById("newUsername");
+    const newEmail = document.getElementById("newEmail");
+    const profilePicUrl = document.getElementById("profilePicUrl");
+    const ratingStars = document.getElementById("ratingStars");
+    const ratingMessage = document.getElementById("ratingMessage");
+    const submitFeedbackBtn = document.getElementById("submitFeedbackBtn");
+    const messageBox = document.getElementById("messageBox");
+    const messageText = document.getElementById("messageText");
+
+    let score = 0;
+    let targets = [];
+    let arrows = [];
+    let targetRadius = 30; // small targets
+    let ammo = 15;
+    let currentRating = 0;
+    let canSpeed = 1;
+    let stage = 1;
+    let targetSpeed = 1; // base moving speed
+    let hitMessages = []; // array to store hit/miss messages
+    let player = {
+        x: canvas.width / 2,
+        y: 480,
+        width: 120,
+        height: 120,
+        speed: 10,
+        angle: Math.PI/2
+    };
+
+    let key = {};
+    const playerSpeed = 5;
+    let gameEnded = false; // New variable to track game state
+
+    // Set canvas dimensions
+    canvas.width = 800;
+    canvas.height = 600;
+
+    // Load images for bow, arrow, target
+    const bowImg = new Image();
+    bowImg.src = "img/bow1.png"; // supports JPEG or PNG
+    const arrowImg = new Image();
+    arrowImg.src = "img/arrow.png "; // place your file in img/arrow.png
+    const targetImg = new Image();
+    targetImg.src = "img/target.png"; // supports JPEG or PNG
+
+    // Optional: convert near-white background to transparent for JPEGs
+    function chromaKeyToTransparent(image, threshold = 245) {
+        const off = document.createElement('canvas');
+        off.width = image.naturalWidth || image.width;
+        off.height = image.naturalHeight || image.height;
+        const ictx = off.getContext('2d');
+        ictx.drawImage(image, 0, 0);
+        const imgData = ictx.getImageData(0, 0, off.width, off.height);
+        const d = imgData.data;
+        for (let i = 0; i < d.length; i += 4) {
+            const r = d[i], g = d[i+1], b = d[i+2];
+            if (r >= threshold && g >= threshold && b >= threshold) {
+                d[i+3] = 0; // transparent
+            }
+        }
+        ictx.putImageData(imgData, 0, 0);
+        return off; // can be used in drawImage
+    }
+
+    let bowDrawable = null;
+    let targetDrawable = null;
+    bowImg.onload = () => {
+        bowDrawable = /\.jpe?g$/i.test(bowImg.src) ? chromaKeyToTransparent(bowImg) : bowImg;
+    };
+    targetImg.onload = () => {
+        targetDrawable = /\.jpe?g$/i.test(targetImg.src) ? chromaKeyToTransparent(targetImg) : targetImg;
+    };
+
+    // FPS pointer lock state
+    let isPointerLocked = false;
+    const mouseSensitivity = 0.015; // radians per pixel
+
+
+    // Draw the player bow (image with fallback canvas art)
+    function drawPlayer() {
+        const bowWidth = 120;
+        const bowHeight = 120;
+        const cx = player.x;
+        const cy = player.y;
+
+        ctx.save();
+        ctx.translate(cx, cy + bowHeight/2);
+        ctx.rotate(player.angle + Math.PI/2);
+
+        if (bowDrawable && (bowDrawable.width || bowDrawable.naturalWidth)) {
+            ctx.drawImage(bowDrawable, -bowWidth/2, -bowHeight/2, bowWidth, bowHeight);
+        } else {
+            // Fallback: draw simple bow
+            ctx.strokeStyle = "#6b3e12";
+            ctx.lineWidth = 10;
+            ctx.beginPath();
+            ctx.arc(0, 0, bowWidth/2, Math.PI*0.1, Math.PI*0.9);
+            ctx.stroke();
+            ctx.strokeStyle = "#a58b6f";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-bowWidth/2 * Math.cos(Math.PI*0.1), -bowWidth/2 * Math.sin(Math.PI*0.1));
+            ctx.lineTo(0, 0);
+            ctx.lineTo(-bowWidth/2 * Math.cos(Math.PI*0.9), -bowWidth/2 * Math.sin(Math.PI*0.9));
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+  
+
+    // Draw and update arrows
+    function drawArrows() {
+        arrows.forEach((arrow, index) => {
+            // Move arrow
+            arrow.x += arrow.vx;
+            arrow.y += arrow.vy;
+
+            // Draw arrow image or fallback shaft
+            ctx.save();
+            ctx.translate(arrow.x, arrow.y);
+            ctx.rotate(arrow.angle);
+            if (arrowImg.complete && arrowImg.naturalWidth > 0) {
+                ctx.drawImage(arrowImg, -15, -6, 30, 12);
+            } else {
+                ctx.strokeStyle = "#8b5a2b";
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(-15, 0);
+                ctx.lineTo(15, 0);
+                ctx.stroke();
+                ctx.fillStyle = "#444";
+                ctx.beginPath();
+                ctx.moveTo(15, 0);
+                ctx.lineTo(9, -4);
+                ctx.lineTo(9, 4);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillStyle = "#c96";
+                ctx.beginPath();
+                ctx.moveTo(-15, 0);
+                ctx.lineTo(-10, 5);
+                ctx.lineTo(-10, -5);
+                ctx.closePath();
+                ctx.fill();
+            }
+            ctx.restore();
+
+            // remove arrow if it goes off screen
+            if (arrow.x < 0 || arrow.x > canvas.width || arrow.y < 0 || arrow.y > canvas.height) {
+                arrows.splice(index, 1);
+            }
+        });
+    }
+
+    // Draw targets (simple small targets)
+    function drawTargets() {
+        targets.forEach((t) => {
+            if (targetDrawable && (targetDrawable.width || targetDrawable.naturalWidth)) {
+                const d = t.r * 2;
+                ctx.drawImage(targetDrawable, t.x - d/2, t.y - d/2, d, d);
+            } else {
+                // fallback: simple red circle
+                ctx.fillStyle = "#e53935";
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
+                ctx.fill();
+                // white center
+                ctx.fillStyle = "#ffffff";
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, t.r * 0.3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
+    }
+
+    // Move targets left-right with different speeds and timing
+    function moveTargets() {
+        targets.forEach((t) => {
+            // All targets move left-right only, but with different characteristics
+            t.x += t.speed * t.direction;
+            
+            // Bounce off edges
+            if (t.x <= t.r + 20 || t.x >= canvas.width - t.r - 20) {
+                t.direction *= -1;
+            }
+        });
+    }
+
+    // Draw hit/miss messages
+    function drawHitMessages() {
+        hitMessages.forEach((msg, index) => {
+            ctx.save();
+            ctx.font = "bold 24px Arial";
+            ctx.fillStyle = msg.color;
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 2;
+            ctx.textAlign = "center";
+            
+            // Fade out effect
+            const alpha = 1 - (msg.timer / 60); // fade over 60 frames
+            ctx.globalAlpha = alpha;
+            
+            ctx.strokeText(msg.text, msg.x, msg.y);
+            ctx.fillText(msg.text, msg.x, msg.y);
+            ctx.restore();
+            
+            msg.timer--;
+            if (msg.timer <= 0) {
+                hitMessages.splice(index, 1);
+            }
+        });
+    }
+
+
+    // Check collisions
+    function checkCollisions() {
+        arrows.forEach((arrow, aIndex) => {
+            let hit = false;
+            targets.forEach((t, tIndex) => {
+                const dx = arrow.x - t.x;
+                const dy = arrow.y - t.y;
+                const dist = Math.hypot(dx, dy);
+                
+                if (dist <= t.r) {
+                    arrows.splice(aIndex, 1);
+                    targets.splice(tIndex, 1);
+                    score += 5; // 5 points per target
+                    scoreboard.textContent = "Score: " + score;
+                    
+                    // Add "Bullseye!" message
+                    hitMessages.push({
+                        text: "Bullseye!",
+                        x: arrow.x,
+                        y: arrow.y - 20,
+                        color: "#00ff00",
+                        timer: 60
+                    });
+                    hit = true;
+                }
+            });
+            
+            // If arrow didn't hit any target, add "Miss!" message
+            if (!hit && arrow.y > canvas.height - 100) {
+                arrows.splice(aIndex, 1);
+                hitMessages.push({
+                    text: "Miss!",
+                    x: arrow.x,
+                    y: arrow.y,
+                    color: "#ff0000",
+                    timer: 60
+                });
+            }
+        });
+
+        if (targets.length === 0 && !gameEnded) {
+            // All targets hit - advance to next stage
+            stage++;
+            targetSpeed += 1.0; // increase speed more significantly each stage
+            ammo = 15; // regenerate arrows
+            ammoCountElement.textContent = "Arrows: " + ammo;
+            initTargets(); // generate new targets with faster movement
+            showMessage(`Stage ${stage}! Targets are moving faster! Speed: ${targetSpeed.toFixed(1)}`);
+        } else if (ammo === 0 && arrows.length === 0 && !gameEnded) {
+            gameEnded = true;
+            showMessage(`Game Over! You reached Stage ${stage}. Press 'R' to restart.`);
+        }
+    }
+
+
+    // Init 15 small targets with different movement patterns
+    function initTargets() {
+        targets = [];
+        const numTargets = 15;
+        const paddingX = 50;
+        const bottomY = canvas.height - 400; // position near bottom
+        const usableW = canvas.width - paddingX * 2;
+        const spacingY = 60; // vertical spacing between rows
+        
+        // Create alternating pattern: 5-4-6 targets per row
+        const targetsPerRow = [5, 4, 6];
+        let targetIndex = 0;
+        
+        for (let row = 0; row < 3; row++) {
+            const numInRow = targetsPerRow[row];
+            const spacingX = usableW / (numInRow + 1); // +1 for better spacing
+            
+            for (let col = 0; col < numInRow; col++) {
+                if (targetIndex >= numTargets) break;
+                
+                // Add slight random offset to make it look more natural
+                const randomOffset = (Math.random() - 0.5) * 20;
+                const baseX = paddingX + (col + 1) * spacingX + randomOffset;
+                const baseY = bottomY - (row * spacingY) + (Math.random() - 0.5) * 10;
+                
+                // Different speeds and directions for variety (all left-right movement)
+                // Speed increases with stage, with individual variation
+                const speed = targetSpeed + (Math.random() * 1.0 - 0.5); // speed variation around base speed
+                const direction = Math.random() > 0.5 ? 1 : -1;
+                
+                const target = {
+                    x: baseX,
+                    y: baseY,
+                    r: targetRadius,
+                    speed: speed,
+                    direction: direction
+                };
+                
+                targets.push(target);
+                targetIndex++;
+            }
+        }
+    }
+
+    // Restart game function
+    function restartGame() {
+        score = 0;
+        ammo = 15;
+        stage = 1;
+        targetSpeed = 1;
+        hitMessages = []; // clear hit messages
+        gameEnded = false;
+        scoreboard.textContent = "Score: " + score;
+        ammoCountElement.textContent = "Arrows: " + ammo;
+        initTargets();
+        arrows = [];
+        hideMessage();
+    }
+
+
+    // Main update loop
+    function update() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (!gameEnded) { // Only update if the game is still running
+            // Move player with keyboard
+            if (key['a'] || key['arrowleft']) {
+                player.x -= player.speed;
+            }
+            if (key['d'] || key['arrowright']) {
+                player.x += player.speed;
+            }
+
+            // Keep player within canvas bounds
+            if (player.x < player.width / 2) {
+                player.x = player.width / 2;
+            }
+            if (player.x > canvas.width - player.width / 2) {
+                player.x = canvas.width - player.width / 2;
+            }
+
+            drawPlayer();
+            // keep bow centered at top
+            player.x = canvas.width / 2;
+            player.y = 480;
+            moveTargets(); // move targets side to side
+            drawArrows();
+            drawTargets();
+            drawHitMessages(); // draw hit/miss messages
+            checkCollisions();
+        }
+        requestAnimationFrame(update);
+    }
+
+
+    // Function to handle shooting
+    let charging = false;
+    let chargeStart = 0;
+    function shoot() {
+        if (!gameEnded && ammo > 0) {
+            const now = performance.now();
+            const chargeMs = Math.min(1000, now - chargeStart);
+            const power = 6 + (chargeMs / 1000) * 8; // 6..14
+            const vx = Math.cos(player.angle) * power;
+            const vy = Math.sin(player.angle) * power;
+            // spawn slightly in front of the bow so it appears to leave the string
+            const spawnOffset = 50;
+            const startX = player.x + Math.cos(player.angle) * spawnOffset;
+            const startY = player.y + Math.sin(player.angle) * spawnOffset;
+            arrows.push({ x: startX, y: startY, vx, vy, angle: player.angle });
+            ammo--;
+            ammoCountElement.textContent = "Arrows: " + ammo;
+        } else if (ammo === 0 && targets.length > 0 && !gameEnded) {
+            gameEnded = true;
+            showMessage("Game Over! You ran out of arrows. Press 'R' to restart.");
+        }
+    }
+
+    // Mouse aim + charge to shoot; enable pointer lock for FPS feel
+    canvas.addEventListener("mousedown", () => {
+        if (!isPointerLocked && canvas.requestPointerLock) {
+            canvas.requestPointerLock();
+        }
+        charging = true; chargeStart = performance.now();
+    });
+    window.addEventListener("mouseup", () => { if (charging) { charging = false; shoot(); } });
+
+    document.addEventListener('pointerlockchange', () => {
+        isPointerLocked = document.pointerLockElement === canvas;
+    });
+
+    // Keyboard controls
+    document.addEventListener("keydown", (e) => {
+        key[e.key.toLowerCase()] = true;
+        
+        // Listen for 'R' key to restart the game
+        if (e.key.toLowerCase() === 'r' && gameEnded) {
+            restartGame();
+        }
+
+        // Listen for 'Space' key to quick shoot
+        if (e.key.toLowerCase() === ' ') { chargeStart = performance.now(); shoot(); }
+    });
+
+    document.addEventListener("keyup", (e) => {
+        key[e.key.toLowerCase()] = false;
+    });
+
+    // Mouse movement for aiming (FPS-style when pointer locked)
+    canvas.addEventListener("mousemove", (e) => {
+        if (isPointerLocked) {
+            // rotate based on horizontal movement; clamp to shoot upwards only
+            player.angle += e.movementX * mouseSensitivity;
+            const minAngle = Math.PI * 0.05;  // near straight down left/right (top archer)
+            const maxAngle = Math.PI * 0.95;
+            if (player.angle < minAngle) player.angle = minAngle;
+            if (player.angle > maxAngle) player.angle = maxAngle;
+        } else {
+            // fallback: aim towards cursor without moving bow from bottom
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            player.angle = Math.atan2(my - player.y, mx - player.x);
+        }
+    });
+
+    // Show messages
+    function showMessage(msg) {
+        messageText.textContent = msg;
+        messageBox.style.display = "block";
+    }
+    function hideMessage() {
+        messageBox.style.display = "none";
+    }
+
+    // Function to show the welcome message
+    async function showWelcomeMessage() {
+        const userId = localStorage.getItem("userId");
+        if (!userId) {
+            showMessage("Welcome! Please log in to save your score.");
+            return;
+        }
+
+        try {
+            const userRes = await fetch(`http://localhost:3000/users/${userId}`);
+            const userData = await userRes.json();
+            if (userData.success) {
+                welcomeUsername.textContent = userData.user.username;
+            }
+        } catch (err) {
+            console.error("Error fetching username:", err);
+            welcomeUsername.textContent = "Player";
+        }
+        welcomeModal.style.display = "block";
+    }
+
+    // Logout
+    async function logout() {
+        const finalScore = score;
+        const userId = localStorage.getItem("userId");
+      
+        if (userId) {
+            try {
+                await fetch("http://localhost:3000/scores", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ userId, score: finalScore }),
+                });
+                showLogoutModal();
+            } catch (err) {
+                console.error("Error saving score:", err);
+                showMessage("An error occurred. Score may not have been saved.");
+                showLogoutModal();
+            }
+        } else {
+            showLogoutModal();
+        }
+    }
+
+    function showLogoutModal() {
+        logoutModal.style.display = "block";
+    }
+
+    // Star rating
+    ratingStars.addEventListener("click", (e) => {
+        const star = e.target.closest(".star");
+        if (!star) return;
+        const rating = parseInt(star.dataset.value, 10);
+        currentRating = rating;
+
+        const stars = document.querySelectorAll("#ratingStars .star");
+        stars.forEach(s => {
+            s.style.color = parseInt(s.dataset.value, 10) <= rating ? "#ffc107" : "#ccc";
+        });
+
+        const messages = ["Bad", "Fair", "Good", "Great", "Excellent!"];
+        ratingMessage.textContent = messages[rating - 1];
+    });
+
+    submitFeedbackBtn.addEventListener("click", () => {
+        const feedback = {
+            userId: localStorage.getItem("userId"),
+            rating: currentRating
+        };
+        console.log("Feedback submitted:", feedback);
+        window.location.href = "index.html";
+    });
+
+// Show profile
+    async function showProfile() {
+        const userId = localStorage.getItem("userId");
+        if (!userId) {
+            showMessage("Please log in to view your profile.");
+            return;
+        }
+
+        profileModal.style.display = "block";
+
+        try {
+            const userRes = await fetch(`http://localhost:3000/users/${userId}`);
+            const userData = await userRes.json();
+            if (userData.success) {
+                profileUsername.innerText = userData.user.username;
+                profileEmail.innerText = userData.user.email;
+                newUsername.value = userData.user.username;
+                newEmail.value = userData.user.email;
+                highestScore.innerText = userData.user.highest_score || 0; // FIX: Ensure highest score is displayed
+                profilePicUrl.value = userData.user.profile_pic_url || ''; // FIX: Populate the input field
+                profileImage.src = userData.user.profile_pic_url || 'https://placehold.co/120x120/ffcc80/b71c1c?text=Perya'; // FIX: Set image source
+            }
+
+            const scoresRes = await fetch(`http://localhost:3000/scores/${userId}`);
+            const scoresData = await scoresRes.json();
+            scoreList.innerHTML = '';
+            if (scoresData.success && scoresData.scores.length > 0) {
+                scoresData.scores.forEach(s => {
+                    const li = document.createElement("li");
+                    li.textContent = `Score: ${s.score}`;
+                    scoreList.appendChild(li);
+                });
+            } else {
+                scoreList.textContent = "No scores found.";
+            }
+            currentScore.innerText = score;
+        } catch (err) {
+            console.error("Error fetching profile data:", err);
+            showMessage("Could not load profile data.");
+        }
+    }
+    // Update profile
+    profileForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const userId = localStorage.getItem("userId");
+        try {
+            const res = await fetch(`http://localhost:3000/users/${userId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    username: newUsername.value,
+                    email: newEmail.value,
+                    profile_pic_url: profilePicUrl.value
+                }),
+            });
+            const data = await res.json();
+            showMessage(data.message);
+            if (res.ok) {
+                profileUsername.innerText = newUsername.value;
+                profileEmail.innerText = newEmail.value;
+                profileImage.src = profilePicUrl.value || 'https://placehold.co/120x120/ffcc80/b71c1c?text=Perya';
+                // FIX: Close the modal after a successful save.
+                profileModal.style.display = 'none';
+            }
+        } catch (err) {
+            console.error("Error updating profile:", err);
+            showMessage("Failed to update profile. Please try again.");
+        }
+    });
+
+    // Event listeners
+    profileBtn.addEventListener("click", showProfile);
+    logoutBtn.addEventListener("click", logout);
+    document.querySelector("#profileModal .close-btn").addEventListener("click", () => {
+        profileModal.style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+        if (e.target === profileModal) profileModal.style.display = "none";
+    });
+
+    // Init
+    initTargets();
+    window.onload = () => {
+        showWelcomeMessage();
+        update();
+    };
+</script>
+
+
+</body>
+</html>
